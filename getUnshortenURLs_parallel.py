@@ -9,19 +9,33 @@ import httplib
 import multiprocessing
 from joblib import Parallel, delayed
 from tqdm import tqdm
+import argparse
 tqdm.monitor_interval = 0
 
-num_cores = 20
-print('Total number of cores: {}'.format(num_cores))
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_file', help='Link to input URL file (Each line one URL)')
+parser.add_argument('--out_file', help='Link to output URL file')
+parser.add_argument('--num_cores', help='Enter number of cores to use')
+args = parser.parse_args()
+
+num_cores = args.num_cores
+
 
 def read_file(filename):
+    '''
+    Read from input URL file and return the list
+    '''
     with open(filename,'r') as fr:
         content = fr.read().split('\n')
     return content
  
 def getExtendedURL(url):
+    '''
+    Get extended URL of each shorten URL and save in output file 
+    Output Format: <shortenURL> <expandedURL>
+    '''
     extended_url = unshortenURL(url)
-    with open('extendedURLs.txt','a+') as fw:
+    with open(args.out_file,'a+') as fw:
         fw.write(str(url) + '\t' + str(extended_url) + '\n')
 
 def unshortenURL(url):
@@ -45,7 +59,12 @@ def unshortenURL(url):
     except:
         return url
 if __name__ == "__main__":
-    content = read_file('allURLs.txt')
+    # Get the URL list from the input file
+    content = read_file(args.input_file)
     content = list(set(content))
+
+    # Do some fancy stuff with tqdm
     inputs = tqdm(content)
+
+    # Parallel execution of extracting unshorten URLs
     processed_list = Parallel(n_jobs=num_cores)(delayed(getExtendedURL)(i) for i in inputs)
