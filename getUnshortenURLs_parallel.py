@@ -40,8 +40,8 @@ def getExtendedURL(url):
 
 def unshortenURL(url, count):
     try:
-        # Try thrice else return the original URL
-        if count == 2:
+        # Try once else return the original URL
+        if count == 1:
             return url
         parsed = urlparse(url)
 
