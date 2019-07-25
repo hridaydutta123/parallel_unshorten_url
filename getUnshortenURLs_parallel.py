@@ -18,7 +18,7 @@ parser.add_argument('--out_file', help='Link to output URL file')
 parser.add_argument('--num_cores', help='Enter number of cores to use')
 args = parser.parse_args()
 
-num_cores = args.num_cores
+num_cores = int(args.num_cores)
 
 
 def read_file(filename):
@@ -34,12 +34,15 @@ def getExtendedURL(url):
     Get extended URL of each shorten URL and save in output file 
     Output Format: <shortenURL> <expandedURL>
     '''
-    extended_url = unshortenURL(url)
+    extended_url = unshortenURL(url, count=0)
     with open(args.out_file,'a+') as fw:
         fw.write(str(url) + '\t' + str(extended_url) + '\n')
 
-def unshortenURL(url):
+def unshortenURL(url, count):
     try:
+        # Try thrice else return the original URL
+        if count == 2:
+            return url
         parsed = urlparse(url)
 
         if parsed.scheme == 'https':
@@ -52,8 +55,12 @@ def unshortenURL(url):
             resource += "?" + parsed.query
         h.request('HEAD', resource )
         response = h.getresponse()
+        
+        # Increment the value of count by 1
+        count = count + 1
+        
         if response.status/100 == 3 and response.getheader('Location'):
-            return unshortenURL(response.getheader('Location')) # changed to process chains of short urls
+            return unshortenURL(response.getheader('Location'), count) # changed to process chains of short urls
         else:
             return url 
     except:
