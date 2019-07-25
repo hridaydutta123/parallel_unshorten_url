@@ -1,5 +1,5 @@
 # Parallel Unshorten URLs
-Expands a short URL (num of cores times faster than usual) and stores the original URL.
+Expands a short URL (num of cores times faster than usual) and returns the expanded URL.
 
 
 ## Usage
